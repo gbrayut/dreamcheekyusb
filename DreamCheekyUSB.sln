@@ -3,6 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DreamCheekyLED", "DreamCheekyLED\DreamCheekyLED.csproj", "{BC275517-0578-42CB-951B-3B7C3ABBF842}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{28DA2B4A-FEB9-4960-BB01-718FFAB8DAB8}"
+	ProjectSection(SolutionItems) = preProject
+		Readme.txt = Readme.txt
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DreamCheekyBTN", "DreamCheekyBTN\DreamCheekyBTN.csproj", "{3AC3E8E6-F4BE-4EC9-BBC3-3C1BFD8D213E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -13,6 +20,10 @@ Global
 		{BC275517-0578-42CB-951B-3B7C3ABBF842}.Debug|x86.Build.0 = Debug|x86
 		{BC275517-0578-42CB-951B-3B7C3ABBF842}.Release|x86.ActiveCfg = Release|x86
 		{BC275517-0578-42CB-951B-3B7C3ABBF842}.Release|x86.Build.0 = Release|x86
+		{3AC3E8E6-F4BE-4EC9-BBC3-3C1BFD8D213E}.Debug|x86.ActiveCfg = Debug|x86
+		{3AC3E8E6-F4BE-4EC9-BBC3-3C1BFD8D213E}.Debug|x86.Build.0 = Debug|x86
+		{3AC3E8E6-F4BE-4EC9-BBC3-3C1BFD8D213E}.Release|x86.ActiveCfg = Release|x86
+		{3AC3E8E6-F4BE-4EC9-BBC3-3C1BFD8D213E}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

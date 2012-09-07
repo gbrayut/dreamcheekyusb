@@ -43,8 +43,7 @@ Examples:
 Device Path:
   Optional, Defaults to first USB device with VID=0x1D34 and PID=0x0004
   Example (VID,PID,Index): device="0x1D34,0x0004,0"
-  Example (Path): device="\\?\hid#vid_1d34&pid_0004#6&1067c3dc&0&0000#{4d1e55b2-
-f16f-11cf-88cb-001111000030}"
+  Example (Path): device="\\?\hid#vid_1d34&pid_0004#6&1067c3dc&0&0000#{4d1e55b2-f16f-11cf-88cb-001111000030}"
 
 Options:
   debug = Print trace statements to Console.Out

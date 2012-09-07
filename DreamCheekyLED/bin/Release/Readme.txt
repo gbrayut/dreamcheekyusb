@@ -1,5 +1,5 @@
 ﻿DreamCheekyLED is a Console / .NET driver for the Dream Cheeky Webmail Notifier (http://www.dreamcheeky.com/webmail-notifier)
-It was created using the https://github.com/mikeobrien/HidLibrary/ and is released under the Apache License
+It was created using the https://github.com/mikeobrien/HidLibrary/ and is released under the Apache License V2.0
 
 You can control the LED using either DreamCheekyLED.exe with command line arguments or via C#/VB/Powershell using 
 the DreamCheekyUSB.DreamCheekyLED object. The code supports multiple devices and has options for blinking and fading.
@@ -43,8 +43,7 @@ Examples:
 Device Path:
   Optional, Defaults to first USB device with VID=0x1D34 and PID=0x0004
   Example (VID,PID,Index): device="0x1D34,0x0004,0"
-  Example (Path): device="\\?\hid#vid_1d34&pid_0004#6&1067c3dc&0&0000#{4d1e55b2-
-f16f-11cf-88cb-001111000030}"
+  Example (Path): device="\\?\hid#vid_1d34&pid_0004#6&1067c3dc&0&0000#{4d1e55b2-f16f-11cf-88cb-001111000030}"
 
 Options:
   debug = Print trace statements to Console.Out
