@@ -13,6 +13,10 @@ namespace DreamCheekyUSB
         public HidLibrary.HidDevice hidBTN;
         public const int DefaultVendorID = 0x1D34;  //Default Vendor ID for Dream Cheeky devices
         public const int DefaultProductID = 0x0008; //Default for Ironman USB stress button
+		
+		public class Messages {
+			public const byte ButtonPressed = 0x1C;
+		}
         //Initialization values and test colors
         public static readonly byte[] cmd_status = new byte[9] { 0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02 };
         #endregion
@@ -21,6 +25,7 @@ namespace DreamCheekyUSB
         private System.Timers.Timer t = new System.Timers.Timer(100); //Timer for checking USB status every 100ms
         private Action Timer_Callback;
         private bool lastWriteResult = false;
+		protected byte activatedMessage;
 
         #region Constructors
         /// <summary>
@@ -40,13 +45,14 @@ namespace DreamCheekyUSB
             var devices = HidLibrary.HidDevices.Enumerate(VendorID, ProductID);
             if (DeviceIndex >= devices.Count())
             {
-                throw new ArgumentOutOfRangeException("DeviceIndex",String.Format("DeviceIndex={0} is invalid. There are only {1} devices connected.", DeviceIndex,devices.Count()));
+                throw new ArgumentOutOfRangeException("DeviceIndex",String.Format("VID={0},PID={1},DeviceIndex={2} is invalid. There are only {3} devices connected.", VendorID, ProductID, DeviceIndex,devices.Count()));
             }
             hidBTN = devices.Skip(DeviceIndex).FirstOrDefault<HidLibrary.HidDevice>();
             if (!init())
             {
                 throw new Exception(String.Format("Cannot find USB HID Device with VendorID=0x{0:X4} and ProductID=0x{1:X4}", VendorID, ProductID));
             }
+			activatedMessage = Messages.ButtonPressed;
         }
 
         /// <summary>
@@ -60,6 +66,7 @@ namespace DreamCheekyUSB
             {
                 throw new Exception(String.Format("Cannot find USB HID Device with DevicePath={0}", DevicePath));
             }
+			activatedMessage = Messages.ButtonPressed;
         }
 
         /// <summary>

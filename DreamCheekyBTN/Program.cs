@@ -27,15 +27,34 @@ namespace DreamCheekyUSB
                 if (string.IsNullOrEmpty(devicearg))
                 {
                     Console.WriteLine("\r\nConnecting to DreamCheekyBTN using default values...");
-                    btn = new DreamCheekyBTN();
+					try
+					{
+						btn = new DreamCheekyBTN();
+					} 
+					catch (Exception ignored)
+					{
+						Console.WriteLine("No Iron Man USB Stress Buttons found.\r\nSearching for Big Red Buttons...");
+						btn = new DreamCheekyBigRedBTN(DreamCheekyBigRedBTN.DefaultVendorID, DreamCheekyBigRedBTN.DefaultProductID);
+					}
                 }
                 else
                 {
-                    Console.WriteLine("\r\nConnecting to DreamCheekyBTN using specified device...");
+                    Console.WriteLine("\r\nConnecting to DreamCheekyBTN using specified device {0}...", devicearg);
                     string[] deviceSplit = devicearg.Substring(7).Split(',');
                     if (deviceSplit.Length == 1)
                     {
-                        btn = new DreamCheekyBTN(deviceSplit[0]); //One argument = device path
+						//One argument = device path
+						var searchString = string.Format("pid_{0}", DreamCheekyBigRedBTN.PID);
+						if (deviceSplit[0].Contains(searchString))
+						{
+							Console.WriteLine("Device is a Big Red Button...");
+							btn = new DreamCheekyBigRedBTN(deviceSplit[0]);
+						}
+						else
+						{
+							Console.WriteLine("Device is a Iron Man USB Stress Button...");
+                        	btn = new DreamCheekyBTN(deviceSplit[0]);
+						}
                     }
                     else
                     {
@@ -48,8 +67,15 @@ namespace DreamCheekyUSB
 
                         int VID = int.Parse(deviceSplit[0].Substring(2), System.Globalization.NumberStyles.HexNumber);
                         int PID = int.Parse(deviceSplit[1].Substring(2), System.Globalization.NumberStyles.HexNumber);
-
-                        btn = new DreamCheekyBTN(VID, PID, devicecount);
+												
+						if (PID == DreamCheekyBTN.DefaultProductID)
+						{
+                        	btn = new DreamCheekyBTN(VID, PID, devicecount);
+						}
+						else
+						{
+							btn = new DreamCheekyBigRedBTN(VID, PID, devicecount);
+						}
                     }
                 }
 
