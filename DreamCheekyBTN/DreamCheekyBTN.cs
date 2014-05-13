@@ -146,11 +146,11 @@ namespace DreamCheekyUSB {
 			if (bigRedBtn != null) {
 				if (LidOpen && bigRedBtn.LidIsClosed()) {
 					LidOpen = false;
-					Console.WriteLine("Lid closed...");
+					Console.WriteLine("{0}: Lid closed...", DateTime.Now.ToLongTimeString());
 				}
 				if (!LidOpen && bigRedBtn.LidIsOpen()) {
 					LidOpen = true;
-					Console.WriteLine("Lid opened...");
+					Console.WriteLine("{0}: Lid opened...", DateTime.Now.ToLongTimeString());
 				}
 			}
 

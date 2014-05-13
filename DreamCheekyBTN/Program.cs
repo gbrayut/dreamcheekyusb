@@ -139,7 +139,7 @@ namespace DreamCheekyUSB {
 
 		static void DoAction() {
 			count++;
-			Trace.WriteLine(String.Format("\r\n{0}: Detected button press event. Count={1}", DateTime.Now.ToLongTimeString(), count));
+			Console.WriteLine(String.Format("\r\n{0}: Detected button press event. Count={1}", DateTime.Now.ToLongTimeString(), count));
 			if (!string.IsNullOrEmpty(strCMD)) {
 				try {
 					Process.Start(strCMD, strCMDARGs);
@@ -149,7 +149,7 @@ namespace DreamCheekyUSB {
 			}
 			if (!string.IsNullOrEmpty(strMacro)) {
 				try {
-					Trace.WriteLine("Sending keys: " + strMacro);
+					Console.WriteLine("Sending keys: " + strMacro);
 					System.Windows.Forms.SendKeys.SendWait(strMacro);
 				} catch (Exception ex) {
 					Trace.TraceError("Error: " + ex.Message);
