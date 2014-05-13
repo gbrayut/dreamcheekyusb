@@ -11,7 +11,6 @@
     <RootNamespace>DreamCheekyUSB</RootNamespace>
     <AssemblyName>DreamCheekyLED</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
@@ -23,6 +22,8 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Commandlineparameters>nopause testblink</Commandlineparameters>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -32,6 +33,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>1347051335_mail_light_new_2.ico</ApplicationIcon>
@@ -51,22 +53,60 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DreamCheekyLED.cs" />
-    <Compile Include="HidLibrary\HidAsyncState.cs" />
-    <Compile Include="HidLibrary\HidDevice.cs" />
-    <Compile Include="HidLibrary\HidDeviceAttributes.cs" />
-    <Compile Include="HidLibrary\HidDeviceCapabilities.cs" />
-    <Compile Include="HidLibrary\HidDeviceData.cs" />
-    <Compile Include="HidLibrary\HidDeviceEventMonitor.cs" />
-    <Compile Include="HidLibrary\HidDevices.cs" />
-    <Compile Include="HidLibrary\HidReport.cs" />
-    <Compile Include="HidLibrary\NativeMethods.cs" />
     <Compile Include="LEDBase.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="HidSharp\AsyncResult.cs" />
+    <Compile Include="HidSharp\HidDevice.cs" />
+    <Compile Include="HidSharp\HidDeviceLoader.cs" />
+    <Compile Include="HidSharp\HidStream.cs" />
+    <Compile Include="HidSharp\Throw.cs" />
+    <Compile Include="HidSharp\Platform\HidManager.cs" />
+    <Compile Include="HidSharp\Platform\HidSelector.cs" />
+    <Compile Include="HidSharp\Platform\Utf8Marshaler.cs" />
+    <Compile Include="HidSharp\Platform\Libusb\LibusbHidManager.cs" />
+    <Compile Include="HidSharp\Platform\Libusb\NativeMethods.cs" />
+    <Compile Include="HidSharp\Platform\Linux\LinuxHidDevice.cs" />
+    <Compile Include="HidSharp\Platform\Linux\LinuxHidManager.cs" />
+    <Compile Include="HidSharp\Platform\Linux\LinuxHidStream.cs" />
+    <Compile Include="HidSharp\Platform\Linux\NativeMethods.cs" />
+    <Compile Include="HidSharp\Platform\MacOS\MacHidDevice.cs" />
+    <Compile Include="HidSharp\Platform\MacOS\MacHidManager.cs" />
+    <Compile Include="HidSharp\Platform\MacOS\MacHidStream.cs" />
+    <Compile Include="HidSharp\Platform\MacOS\NativeMethods.cs" />
+    <Compile Include="HidSharp\Platform\Unsupported\UnsupportedHidManager.cs" />
+    <Compile Include="HidSharp\Platform\Windows\NativeMethods.cs" />
+    <Compile Include="HidSharp\Platform\Windows\WinHidDevice.cs" />
+    <Compile Include="HidSharp\Platform\Windows\WinHidManager.cs" />
+    <Compile Include="HidSharp\Platform\Windows\WinHidStream.cs" />
+    <Compile Include="HidSharp\ReportDescriptors\CollectionType.cs" />
+    <Compile Include="HidSharp\ReportDescriptors\DataMainItemFlags.cs" />
+    <Compile Include="HidSharp\ReportDescriptors\EncodedItem.cs" />
+    <Compile Include="HidSharp\ReportDescriptors\GlobalItemTag.cs" />
+    <Compile Include="HidSharp\ReportDescriptors\ItemType.cs" />
+    <Compile Include="HidSharp\ReportDescriptors\LocalItemTag.cs" />
+    <Compile Include="HidSharp\ReportDescriptors\MainItemTag.cs" />
+    <Compile Include="HidSharp\ReportDescriptors\Parser\IndexBase.cs" />
+    <Compile Include="HidSharp\ReportDescriptors\Parser\IndexList.cs" />
+    <Compile Include="HidSharp\ReportDescriptors\Parser\IndexRange.cs" />
+    <Compile Include="HidSharp\ReportDescriptors\Parser\LocalIndexes.cs" />
+    <Compile Include="HidSharp\ReportDescriptors\Parser\Report.cs" />
+    <Compile Include="HidSharp\ReportDescriptors\Parser\ReportCollection.cs" />
+    <Compile Include="HidSharp\ReportDescriptors\Parser\ReportDescriptorParser.cs" />
+    <Compile Include="HidSharp\ReportDescriptors\Parser\ReportMainItem.cs" />
+    <Compile Include="HidSharp\ReportDescriptors\Parser\ReportSegment.cs" />
+    <Compile Include="HidSharp\ReportDescriptors\Parser\ReportType.cs" />
+    <Compile Include="HidSharp\ReportDescriptors\Units\CurrentUnit.cs" />
+    <Compile Include="HidSharp\ReportDescriptors\Units\LengthUnit.cs" />
+    <Compile Include="HidSharp\ReportDescriptors\Units\LuminousIntensityUnit.cs" />
+    <Compile Include="HidSharp\ReportDescriptors\Units\MassUnit.cs" />
+    <Compile Include="HidSharp\ReportDescriptors\Units\TemperatureUnit.cs" />
+    <Compile Include="HidSharp\ReportDescriptors\Units\TimeUnit.cs" />
+    <Compile Include="HidSharp\ReportDescriptors\Units\Unit.cs" />
+    <Compile Include="HidSharp\ReportDescriptors\Units\UnitSystem.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="1347051335_mail_light_new_2.ico" />
-    <Content Include="HidLibrary\readme.txt" />
     <Content Include="Readme.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -78,6 +118,10 @@
     <None Include="DreamCheekyLED_Outlook.ps1">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="HidSharp\HidSharp.csproj" />
+    <None Include="HidSharp\obj\Debug\HidSharp.csproj.FilesWrittenAbsolute.txt" />
+    <None Include="HidSharp\obj\Debug\HidSharp.dll" />
+    <None Include="HidSharp\obj\Debug\HidSharp.dll.mdb" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
@@ -87,4 +131,7 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <ItemGroup>
+    <Folder Include="HidSharp\" />
+  </ItemGroup>
 </Project>

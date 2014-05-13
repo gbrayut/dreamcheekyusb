@@ -1,176 +1,178 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Diagnostics;
 using System.Threading;
+using HidSharp;
 
-namespace DreamCheekyUSB
-{
-    public class DreamCheekyBTN 
-    {
-        #region Constant and readonly values
-        public HidLibrary.HidDevice hidBTN;
-        public const int DefaultVendorID = 0x1D34;  //Default Vendor ID for Dream Cheeky devices
-        public const int DefaultProductID = 0x0008; //Default for Ironman USB stress button
-		
-		public class Messages {
-			public const byte ButtonPressed = 0x1C;
+namespace DreamCheekyUSB {
+	public class DreamCheekyBTN : IDisposable {
+		#region Constant and readonly values
+
+		protected HidDeviceLoader Loader;
+		protected HidStream Stream;
+		public HidDevice HidBTN;
+		public const int DEFAULT_VENDOR_ID = 0x1D34;
+		//Default Vendor ID for Dream Cheeky devices
+		public const int DEFAULT_PRODUCT_ID = 0x0008;
+		//Default for Ironman USB stress button
+		public static class Messages {
+			public const byte BUTTON_PRESSED = 0x1C;
 		}
-        //Initialization values and test colors
-        public static readonly byte[] cmd_status = new byte[9] { 0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02 };
-        #endregion
+		//Initialization values and test colors
+		public static readonly byte[] CmdStatus = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02 };
 
-        private AutoResetEvent WriteEvent = new AutoResetEvent(false);
-        private System.Timers.Timer t = new System.Timers.Timer(100); //Timer for checking USB status every 100ms
-        private Action Timer_Callback;
-        private bool lastWriteResult = false;
-		protected byte activatedMessage;
+		#endregion
 
-        #region Constructors
-        /// <summary>
-        /// Default constructor. Will used VendorID=0x1D34 and ProductID=0x0008. Will throw exception if no device is found.
-        /// </summary>
-        /// <param name="DeviceIndex">Zero based device index if you have multiple devices plugged in.</param>
-        public DreamCheekyBTN(int DeviceIndex = 0) : this(DefaultVendorID, DefaultProductID, DeviceIndex) { }
+		private AutoResetEvent WriteEvent = new AutoResetEvent(false);
+		private System.Timers.Timer t = new System.Timers.Timer(100);
+		//Timer for checking USB status every 100ms
+		private Action Timer_Callback;
+		private bool LidOpen;
+		protected byte ActivatedMessage;
 
-        /// <summary>
-        /// Create object using VendorID and ProductID. Will throw exception if no USBLED is found.
-        /// </summary>
-        /// <param name="VendorID">Example to 0x1D34</param>
-        /// <param name="ProductID">Example to 0x0008</param>
-        /// <param name="DeviceIndex">Zero based device index if you have multiple devices plugged in.</param>
-        public DreamCheekyBTN(int VendorID, int ProductID, int DeviceIndex=0)
-        {
-            var devices = HidLibrary.HidDevices.Enumerate(VendorID, ProductID);
-            if (DeviceIndex >= devices.Count())
-            {
-                throw new ArgumentOutOfRangeException("DeviceIndex",String.Format("VID={0},PID={1},DeviceIndex={2} is invalid. There are only {3} devices connected.", VendorID, ProductID, DeviceIndex,devices.Count()));
-            }
-            hidBTN = devices.Skip(DeviceIndex).FirstOrDefault<HidLibrary.HidDevice>();
-            if (!init())
-            {
-                throw new Exception(String.Format("Cannot find USB HID Device with VendorID=0x{0:X4} and ProductID=0x{1:X4}", VendorID, ProductID));
-            }
-			activatedMessage = Messages.ButtonPressed;
-        }
+		#region Constructors
 
-        /// <summary>
-        /// Create object using Device path. Example: DreamCheekyBTN(@"\\?\hid#vid_1d34&pid_0008#6&1067c3dc&0&0000#{4d1e55b2-f16f-11cf-88cb-001111000030}").
-        /// </summary>
-        /// <param name="DevicePath">Example: @"\\?\hid#vid_1d34&pid_0008#6&1067c3dc&0&0000#{4d1e55b2-f16f-11cf-88cb-001111000030}"</param>
-        public DreamCheekyBTN(string DevicePath)
-        {
-            hidBTN = HidLibrary.HidDevices.GetDevice(DevicePath);
-            if (!init())
-            {
-                throw new Exception(String.Format("Cannot find USB HID Device with DevicePath={0}", DevicePath));
-            }
-			activatedMessage = Messages.ButtonPressed;
-        }
+		/// <summary>
+		/// Default constructor. Will used VendorID=0x1D34 and ProductID=0x0008. Will throw exception if no device is found.
+		/// </summary>
+		/// <param name="deviceIndex">Zero based device index if you have multiple devices plugged in.</param>
+		public DreamCheekyBTN(int deviceIndex = 0) : this(DEFAULT_VENDOR_ID, DEFAULT_PRODUCT_ID, deviceIndex) {
+		}
 
-        /// <summary>
-        /// Private init function for constructors.
-        /// </summary>
-        /// <returns>True if success, false otherwise.</returns>
-        private bool init()
-        {
-            this.WriteEvent.Reset();
-            t.AutoReset = true;
-            t.Elapsed += new System.Timers.ElapsedEventHandler(t_Elapsed);
-            t.Enabled = false;
-            t.Stop();
-            if (hidBTN == default(HidLibrary.HidDevice))
-            {
-                return false; //Device not found, return false.
-            }
-            else //Device is valid
-            {
-                Trace.WriteLine("Init HID device: " + hidBTN.Description + "\r\n");
-                return true;
-            }
-        }
+		/// <summary>
+		/// Create object using VendorID and ProductID. Will throw exception if no USBLED is found.
+		/// </summary>
+		/// <param name="vendorID">Example to 0x1D34</param>
+		/// <param name="productID">Example to 0x0008</param>
+		/// <param name="deviceIndex">Zero based device index if you have multiple devices plugged in.</param>
+		public DreamCheekyBTN(int vendorID, int productID, int deviceIndex = 0) {
+			var loader = new HidDeviceLoader();
+			var devices = new List<HidDevice>(loader.GetDevices(vendorID, productID));
+			if (deviceIndex >= devices.Count) {
+				throw new ArgumentOutOfRangeException("deviceIndex", String.Format("VID={0},PID={1},DeviceIndex={2} is invalid. There are only {3} devices connected.", vendorID, productID, deviceIndex, devices.Count));
+			}
+			HidBTN = devices[deviceIndex];
+			if (!init()) {
+				throw new Exception(String.Format("Cannot find USB HID Device with VendorID=0x{0:X4} and ProductID=0x{1:X4}", vendorID, productID));
+			}
+			ActivatedMessage = Messages.BUTTON_PRESSED;
+		}
 
-        ~DreamCheekyBTN()
-        {
-            t.Dispose();
-            Timer_Callback = null;
+		/// <summary>
+		/// Create object using Device path. Example: DreamCheekyBTN(@"\\?\hid#vid_1d34&pid_0008#6&1067c3dc&0&0000#{4d1e55b2-f16f-11cf-88cb-001111000030}").
+		/// </summary>
+		/// <param name="devicePath">Example: @"\\?\hid#vid_1d34&pid_0008#6&1067c3dc&0&0000#{4d1e55b2-f16f-11cf-88cb-001111000030}"</param>
+		public DreamCheekyBTN(string devicePath) {
+			var loader = new HidDeviceLoader();
+			var devices = loader.GetDevices();
+			foreach (var device in devices) {
+				if (device.DevicePath == devicePath) {
+					HidBTN = device;
+				}
+			}
+			if (!init()) {
+				throw new Exception(String.Format("Cannot find USB HID Device with DevicePath={0}", devicePath));
+			}
+			ActivatedMessage = Messages.BUTTON_PRESSED;
+		}
 
-            if (hidBTN != null)
-            {
-                hidBTN.Dispose();
-            }
-        }
-        #endregion
+		/// <summary>
+		/// Private init function for constructors.
+		/// </summary>
+		/// <returns>True if success, false otherwise.</returns>
+		private bool init() {
+			WriteEvent.Reset();
+			t.AutoReset = true;
+			t.Elapsed += t_Elapsed;
+			t.Enabled = false;
+			t.Stop();
+			if (HidBTN == default(HidDevice)) {
+				return false; //Device not found, return false.
+			}
 
-        public bool ButtonState { get; private set; }
+			Stream = HidBTN.Open();
+			//Device is valid
+			Trace.WriteLine("Init HID device: " + HidBTN.ProductName + "\r\n");
+			return true;
+		}
 
-        public bool Write(byte[] data)
-        {   
-            //Trace.WriteLine("\r\nWriteing Data=" + BitConverter.ToString(data));
-            hidBTN.Write(data, SignalWrite);
-            this.WriteEvent.WaitOne();
-            return lastWriteResult;
-        }
+		public void Dispose() {
+			if (t != null) {
+				t.Dispose();
+				t = null;
+			}
+			Timer_Callback = null;
 
-        /// <summary>
-        /// Used by Write method to set WriteEvent when finished
-        /// </summary>
-        /// <param name="result"></param>
-        private void SignalWrite(bool result)
-        {
-            //Trace.WriteLine("Writeing Data result=" + result);
-            lastWriteResult = result;
-            this.WriteEvent.Set();
-        }
+			if (Stream != default(HidStream)) {
+				Stream.Close();
+				Stream.Dispose();
+				Stream = default(HidStream);
+			}
+		}
 
-        public HidLibrary.HidDeviceData Read()
-        {
-            return hidBTN.Read();
-        }
+		~DreamCheekyBTN() {
+			Dispose();
+		}
 
-        public bool GetStatus() {
-            if (Write(cmd_status))
-            {
-                var data = Read();
-                if (data.Data[1] == 0x1C)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            else
-            {
-                Debug.WriteLine("Status CMD failed...");
-                return false;
-            }
-        }
+		#endregion
 
-        public void RegisterCallback(Action Callback)
-        {
-            Timer_Callback = Callback;
-            t.Enabled = true;
-            t.Start();
-        }
+		public bool ButtonState { get; private set; }
 
-        void t_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
-        {
-            if (GetStatus())
-            {
-                if (!ButtonState) //Only toggle if button not already set
-                {
-                    ButtonState = true;
-                    Timer_Callback();
-                }
-            }
-            else
-            {
-                ButtonState = false; //Reset state
-            }
-        }
-    }
+		private static bool IsUnix() {
+			var platform = Environment.OSVersion.Platform;
+			return (platform == PlatformID.MacOSX) || (platform == PlatformID.Unix);
+		}
+
+		public void Write(byte[] data) {
+			//Trace.WriteLine("\r\nWriteing Data=" + BitConverter.ToString(data));
+			if (IsUnix()) {
+				Stream.Write(data);
+			} else {
+				var windowsData = new byte[9];
+				data.CopyTo(windowsData, 1);
+				Stream.Write(windowsData);
+			}
+		}
+
+		public byte[] Read() {
+			return Stream.Read();
+		}
+
+		public bool GetStatus() {
+			Write(CmdStatus);
+			var data = Read();
+
+			var bigRedBtn = this as DreamCheekyBigRedBTN;
+			if (bigRedBtn != null) {
+				if (LidOpen && bigRedBtn.LidIsClosed()) {
+					LidOpen = false;
+					Console.WriteLine("Lid closed...");
+				}
+				if (!LidOpen && bigRedBtn.LidIsOpen()) {
+					LidOpen = true;
+					Console.WriteLine("Lid opened...");
+				}
+			}
+
+			return data[0] == ActivatedMessage;
+		}
+
+		public void RegisterCallback(Action callback) {
+			Timer_Callback = callback;
+			t.Enabled = true;
+			t.Start();
+		}
+
+		void t_Elapsed(object sender, System.Timers.ElapsedEventArgs e) {
+			if (GetStatus()) {
+				if (!ButtonState) { //Only toggle if button not already set
+					ButtonState = true;
+					Timer_Callback();
+				}
+			} else {
+				ButtonState = false; //Reset state
+			}
+		}
+	}
 }
 
